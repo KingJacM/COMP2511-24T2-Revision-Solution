@@ -1,0 +1,68 @@
+plugins {
+    id 'java'
+    id 'jacoco'
+    id("org.barfuin.gradle.jacocolog") version "3.1.0"
+}
+
+repositories {
+    // Use Maven Central for resolving dependencies.
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'com.google.code.gson:gson:2.8.8'
+    implementation 'org.json:json:20210307'
+    // Use JUnit Jupiter for testing.
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.9.3'
+
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+tasks.named('test') {
+    // Use JUnit Platform for unit tests.
+    useJUnitPlatform()
+}
+
+
+// Apply a specific Java toolchain to ease working on different environments.
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+jacocoTestReport {
+    reports {
+        xml.required = true
+        csv.required = false
+    }
+    dependsOn test // tests are required to run before generating the report
+}
+
+jacocoTestCoverageVerification {
+    // violationRules {
+    //     rule {
+    //         limit {
+    //             counter = "BRANCH"
+    //             minimum = 0.80
+    //         }
+    //     }
+    // }
+    dependsOn jacocoTestReport
+}
+
+task coverage {
+    description("Generate coverage report and check if above threshold if it exists")
+    group("verification")
+    dependsOn('jacocoTestCoverageVerification')
+}
+
+jacocoLogTestCoverage {
+    logAlways = true
+    counters {
+        showClassCoverage = false
+        showMethodCoverage = false
+        showInstructionCoverage = false
+        showComplexityCoverage = false
+    }
+}
